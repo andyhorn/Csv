@@ -2,11 +2,12 @@
 using NUnit.Framework;
 using System.Linq;
 using System;
+using Csv.Core;
 
 namespace Csv.Test
 {
     [TestFixture]
-    public class CsvTests
+    public class CsvReaderTests
     {
         private const string BaseCsvFilename = "BaseTestCsv.csv";
 
@@ -14,7 +15,7 @@ namespace Csv.Test
         public void ReadsCsvFromFile()
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
-            var csv = Csv.Core.Csv.FromFile(path);
+            var csv = CsvReader.FromFile(path);
             Assert.IsNotNull(csv);
         }
 
@@ -23,7 +24,25 @@ namespace Csv.Test
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
             var stream = File.OpenRead(path);
-            var csv = Csv.Core.Csv.FromStream(stream);
+            var csv = CsvReader.FromStream(stream);
+            Assert.IsNotNull(csv);
+        }
+
+        [Test]
+        public void ReadsCsvFromString()
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
+            var data = File.ReadAllText(path);
+            var csv = CsvReader.FromString(data);
+            Assert.IsNotNull(csv);
+        }
+
+        [Test]
+        public void ReadsCsvFromLines()
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
+            var data = File.ReadAllLines(path);
+            var csv = CsvReader.FromLines(data);
             Assert.IsNotNull(csv);
         }
 
@@ -32,7 +51,7 @@ namespace Csv.Test
         {
             const int numRows = 2;
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
-            var csv = Csv.Core.Csv.FromFile(path);
+            var csv = CsvReader.FromFile(path);
 
             Assert.AreEqual(numRows, csv.Rows.Count());
         }
@@ -42,7 +61,7 @@ namespace Csv.Test
         {
             const int numColumns = 4;
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
-            var csv = Csv.Core.Csv.FromFile(path);
+            var csv = CsvReader.FromFile(path);
 
             Assert.AreEqual(numColumns, csv.Columns.Count());
         }
@@ -52,7 +71,7 @@ namespace Csv.Test
         {
             const int numCells = 8;
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
-            var csv = Core.Csv.FromFile(path);
+            var csv = CsvReader.FromFile(path);
 
             var count = csv.Rows.Sum(r => r.Cells.Count());
 
@@ -64,21 +83,21 @@ namespace Csv.Test
         {
             var path = string.Empty;
 
-            Assert.Throws<ArgumentNullException>(() => Csv.Core.Csv.FromFile(path));
+            Assert.Throws<ArgumentNullException>(() => CsvReader.FromFile(path));
         }
 
         [Test]
         public void ThrowsExceptionForMissingFile()
         {
             var path = "/Some/Garbage/Path";
-            Assert.Throws<FileNotFoundException>(() => Core.Csv.FromFile(path));
+            Assert.Throws<FileNotFoundException>(() => CsvReader.FromFile(path));
         }
 
         [Test]
         public void ThrowsExceptionForNullStream()
         {
             Stream stream = null;
-            Assert.Throws<ArgumentException>(() => Core.Csv.FromStream(stream));
+            Assert.Throws<ArgumentException>(() => CsvReader.FromStream(stream));
         }
     }
 }
