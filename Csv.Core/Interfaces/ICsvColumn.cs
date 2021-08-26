@@ -6,5 +6,6 @@ namespace Csv.Core.Interfaces
     {
         int Index { get; }
         IEnumerable<ICsvCell> Cells { get; }
+        ICsvHeader Header { get; }
     }
 }
