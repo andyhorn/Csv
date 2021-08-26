@@ -12,4 +12,15 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Csv.Core\Csv.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="BaseTestCsv.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BaseTestCsv.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

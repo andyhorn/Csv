@@ -28,6 +28,21 @@ namespace Csv.Core
 
         public IEnumerable<ICsvColumn> Columns { get; }
 
+        public ICsvCell GetCell(int row, int column)
+        {
+            if (row >= Rows.Count())
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            if (column >= Columns.Count())
+            {
+                throw new ArgumentOutOfRangeException(nameof(column));
+            }
+
+            return Rows.ElementAt(row).Cells.ElementAt(column);
+        }
+
         public static ICsv FromFile(string fileName, bool hasHeaders = true, char separator = ',')
         {
             if (string.IsNullOrWhiteSpace(fileName))
@@ -74,7 +89,7 @@ namespace Csv.Core
                 currentLine = reader.ReadLine();
             }
 
-            var numColumns = currentLine.Count(x => x.Equals(separator));
+            var numColumns = 1 + currentLine.Count(x => x.Equals(separator));
             var rowIndex = 0;
 
             for (var i = 0; i < numColumns; i++)
@@ -86,6 +101,7 @@ namespace Csv.Core
             while (!string.IsNullOrEmpty(currentLine))
             {
                 var row = new CsvRow(rowIndex++);
+                ((List<ICsvRow>)csv.Rows).Add(row);
 
                 var rowData = currentLine.Split(separator);
 
@@ -103,8 +119,10 @@ namespace Csv.Core
                     };
 
                     ((List<ICsvCell>)row.Cells).Add(cell);
-                    ((List<ICsvCell>)csv.Columns.ElementAt(i)).Add(cell);
+                    ((List<ICsvCell>)csv.Columns.ElementAt(i).Cells).Add(cell);
                 }
+
+                currentLine = reader.ReadLine();
             }
 
             return csv;
