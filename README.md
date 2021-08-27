@@ -1,10 +1,10 @@
-﻿# Csv.Core
+# Csv.Core
 
 A simple .Net Core class library for reading, manipulating, and writing CSV-formatted data.
 
 ## Overview
 
-Read CSV data from a file or `Stream` with the `CsvReader` class or create a new instance with the `CsvFactory`.
+Read CSV data from a file or `Stream` with the `CsvReader` class or create a new instance with the `CsvFactory` (`CsvFactory.New`).
 
 Examine and manipulate CSV data in memory with the `ICsv` interface.
 
