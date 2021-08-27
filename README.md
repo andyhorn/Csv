@@ -134,3 +134,6 @@ My hope is to keep this library simple and easy to use while providing useful fe
 
 Some ideas for possible improvements include:
   * Templating the `ICsv` interface to easily map between CSV data and user-defined C# classes
+
+# Known Bugs
+There are no currently identified issues.
