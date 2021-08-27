@@ -57,7 +57,7 @@ namespace Csv.Core
         /// </summary>
         /// <param name="csv">The <see cref="ICsv"/> instance to be written.</param>
         /// <param name="stream">The <see cref="Stream"/> instance to be written to.</param>
-        public static async Task ToStream(ICsv csv, Stream stream)
+        public static async Task ToStreamAsync(ICsv csv, Stream stream)
         {
             if (csv == null)
             {
@@ -73,8 +73,24 @@ namespace Csv.Core
             await WriteToWriterAsync(csv, writer);
         }
 
+        /// <summary>
+        /// Writes an <see cref="ICsv"/> instance to a supplied <see cref="Stream"/>,
+        /// synchronously.
+        /// </summary>
+        /// <param name="csv">The <see cref="ICsv"/> instance to be written.</param>
+        /// <param name="stream">The <see cref="Stream"/> instance to be written to.</param>
+        public static void ToStream(ICsv csv, Stream stream)
+        {
+            ToStreamAsync(csv, stream).GetAwaiter();
+        }
+
         private static async Task WriteToWriterAsync(ICsv csv, StreamWriter writer)
         {
+            if (csv.HasHeaders)
+            {
+                await writer.WriteLineAsync(string.Join(csv.Separator, csv.Headers.Select(x => x.Title)));
+            }
+
             foreach (var row in csv.Rows)
             {
                 await writer.WriteLineAsync(string.Join(csv.Separator, row.Cells.Select(c => c.Value)));
