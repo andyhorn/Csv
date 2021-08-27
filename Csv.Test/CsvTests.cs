@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Csv.Core.Interfaces;
 using Csv.Core.Models;
 using NUnit.Framework;
@@ -160,12 +159,12 @@ namespace Csv.Test
         {
             var csv = new Core.Models.Csv
             {
-                Headers = new List<ICsvHeader>
+                Headers = new ICsvHeader[]
                 {
                     new CsvHeader(0, "HeaderOne"),
                     new CsvHeader(1, "HeaderTwo"),
                     new CsvHeader(2, "HeaderThree"),
-                }.ToArray(),
+                },
             };
 
             csv.Cells = new ICsvCell[][]
