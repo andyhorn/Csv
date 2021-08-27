@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Description>Class library for reading, manipulating, and writing CSV data.</Description>
   </PropertyGroup>
 
   <ItemGroup>
