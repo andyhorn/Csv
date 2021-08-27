@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csv.Core", "Csv.Core\Csv.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csv.Test", "Csv.Test\Csv.Test.csproj", "{BBE1F776-8146-45EE-9B12-2A769C773590}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3F4FA652-0341-4CFC-8F30-94A6E5ED1E0F}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		Csv.Core.png = Csv.Core.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
