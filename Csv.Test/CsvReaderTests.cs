@@ -73,7 +73,7 @@ namespace Csv.Test
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
             var csv = CsvReader.FromFile(path);
 
-            var count = csv.Rows.Sum(r => r.Cells.Count());
+            var count = (csv as Core.Models.Csv).Cells.Sum(x => x.Count());
 
             Assert.AreEqual(numCells, count);
         }
