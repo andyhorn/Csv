@@ -3,17 +3,17 @@
     public interface ICsv
     {
         /// <summary>
-        /// Gets the absolute filename of the CSV file, if one was used.
+        /// Gets or sets the absolute filename of the CSV file, if one was used.
         /// </summary>
         string Filename { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this CSV has a header row.
         /// </summary>
-        bool HasHeaders { get; set; }
+        bool HasHeaders { get; }
 
         /// <summary>
-        /// Gets the separator used to separate cells.
+        /// Gets or sets the separator used to separate cells.
         /// </summary>
         char Separator { get; set; }
 
@@ -28,7 +28,7 @@
         int NumColumns { get; }
 
         /// <summary>
-        /// Gets an array of <see cref="ICsvHeader"/>.
+        /// Gets or sets an array of <see cref="ICsvHeader"/>.
         /// </summary>
         ICsvHeader[] Headers { get; set; }
 
