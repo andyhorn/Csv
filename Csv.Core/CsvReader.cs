@@ -41,11 +41,10 @@ namespace Csv.Core
         {
             var csv = new Models.Csv
             {
-                HasHeaders = hasHeaders,
                 Separator = separator,
             };
 
-            var numColumns = AddHeaders(csv, lines[0]);
+            var numColumns = AddHeaders(csv, lines[0], hasHeaders);
             lines = hasHeaders ? lines.Skip(1).ToArray() : lines;
 
             for (var i = 0; i < lines.Count(); i++)
@@ -102,14 +101,13 @@ namespace Csv.Core
 
             var csv = new Models.Csv
             {
-                HasHeaders = hasHeaders,
                 Separator = separator,
             };
 
             using var reader = new StreamReader(stream);
             var currentLine = reader.ReadLine(); // read the first line
 
-            var numColumns = AddHeaders(csv, currentLine);
+            var numColumns = AddHeaders(csv, currentLine, hasHeaders);
             currentLine = hasHeaders ? reader.ReadLine() : currentLine;
 
             while (!string.IsNullOrEmpty(currentLine))
@@ -132,11 +130,11 @@ namespace Csv.Core
             }
         }
 
-        private static int AddHeaders(ICsv csv, string firstLine)
+        private static int AddHeaders(ICsv csv, string firstLine, bool hasHeaders)
         {
             var count = firstLine.Split(csv.Separator).Count();
 
-            if (!csv.HasHeaders)
+            if (!hasHeaders)
             {
                 return count;
             }
