@@ -24,7 +24,7 @@ namespace Csv.Core.Models
         public string Filename { get; set; }
 
         /// <inheritdoc/>
-        public bool HasHeaders { get; set; }
+        public bool HasHeaders => Headers != null && Headers.Any();
 
         /// <inheritdoc/>
         public char Separator { get; set; }
