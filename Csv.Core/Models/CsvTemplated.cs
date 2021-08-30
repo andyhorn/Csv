@@ -114,7 +114,34 @@ namespace Csv.Core.Models
 
         private int GetColumnIndex(PropertyInfo property)
         {
-            throw new NotImplementedException();
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
+            var header = FindOrCreateHeader(property);
+
+            return header.Index;
+        }
+
+        private ICsvHeader FindOrCreateHeader(PropertyInfo property)
+        {
+            var title = property.Name;
+
+            if (HeaderMap?.ContainsKey(property) ?? false)
+            {
+                title = HeaderMap[property];
+            }
+
+            var header = Headers.FirstOrDefault(h => h.Title.Equals(title));
+
+            if (header == null)
+            {
+                header = new CsvHeader(NumColumns, title);
+                Headers = Headers.Append(header).ToArray();
+            }
+
+            return header;
         }
     }
 }
