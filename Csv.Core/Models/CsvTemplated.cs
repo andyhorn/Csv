@@ -101,7 +101,15 @@ namespace Csv.Core.Models
 
         public void Remove(int index)
         {
-            throw new NotImplementedException();
+            if (index < 0 || index >= NumRows)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            Cells = Cells
+                .Select((c, i) => i != index ? c : null)
+                .Where(c => c != null)
+                .ToArray();
         }
 
         private int GetColumnIndex(PropertyInfo property)
