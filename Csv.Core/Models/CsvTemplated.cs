@@ -69,12 +69,34 @@ namespace Csv.Core.Models
 
         public T Get(int index)
         {
-            throw new NotImplementedException();
+            if (index < 0 || index >= NumRows)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            var item = Activator.CreateInstance<T>();
+
+            foreach (var property in _properties)
+            {
+                var columnIndex = GetColumnIndex(property);
+                object value = GetCell(index, columnIndex).Value;
+                property.SetValue(item, value);
+            }
+
+            return item;
         }
 
         public ICollection<T> Get()
         {
-            throw new NotImplementedException();
+            var items = new List<T>();
+
+            for (var i = 0; i < NumRows; i++)
+            {
+                var item = Get(i);
+                items.Add(item);
+            }
+
+            return items;
         }
 
         public void Remove(int index)
