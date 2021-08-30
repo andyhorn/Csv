@@ -11,5 +11,10 @@ namespace Csv.Core
         /// Gets a new instance of the <see cref="ICsv"/> interface.
         /// </summary>
         public static ICsv New { get => new Models.Csv(); }
+
+        public static ICsv<T> ForType<T>()
+        {
+            return new Models.Csv<T>();
+        }
     }
 }
