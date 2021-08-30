@@ -28,6 +28,12 @@ namespace Csv.Core
             return FromLines(lines, hasHeaders, separator);
         }
 
+        public static ICsv<T> FromString<T>(string csvData, bool hasHeaders = true, char separator = ',')
+        {
+            var lines = csvData.Split(NewLineOperators, StringSplitOptions.RemoveEmptyEntries);
+            return FromLines<T>(lines, hasHeaders, separator);
+        }
+
         /// <summary>
         /// Creates an <see cref="ICsv"/> instance from a collection of CSV-formatted
         /// strings, with each string representing a row of data.
@@ -45,6 +51,24 @@ namespace Csv.Core
             };
 
             var numColumns = AddHeaders(csv, lines[0], hasHeaders);
+            lines = hasHeaders ? lines.Skip(1).ToArray() : lines;
+
+            for (var i = 0; i < lines.Count(); i++)
+            {
+                AddRowData(csv, lines[i], numColumns);
+            }
+
+            return csv;
+        }
+
+        public static ICsv<T> FromLines<T>(string[] lines, bool hasHeaders = true, char separator = ',')
+        {
+            var csv = new Models.Csv<T>
+            {
+                Separator = separator,
+            };
+
+            var numColumns = lines.First().Split(separator).Count();
             lines = hasHeaders ? lines.Skip(1).ToArray() : lines;
 
             for (var i = 0; i < lines.Count(); i++)
@@ -83,6 +107,26 @@ namespace Csv.Core
             return csv;
         }
 
+        public static ICsv<T> FromFile<T>(string fileName, bool hasHeaders = true, char separator = ',')
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+
+            if (!File.Exists(fileName))
+            {
+                throw new FileNotFoundException();
+            }
+
+            using var stream = File.OpenRead(fileName);
+            var csv = FromStream<T>(stream, hasHeaders, separator);
+
+            (csv as Models.Csv<T>).Filename = fileName;
+
+            return csv;
+        }
+
         /// <summary>
         /// Creates an <see cref="ICsv"/> instance from a <see cref="Stream"/> of
         /// CSV-formatted data.
@@ -113,6 +157,35 @@ namespace Csv.Core
             while (!string.IsNullOrEmpty(currentLine))
             {
                 AddRowData(csv, currentLine, numColumns);
+                currentLine = reader.ReadLine();
+            }
+
+            return csv;
+        }
+
+        public static ICsv<T> FromStream<T>(Stream stream, bool hasHeaders = true, char separator = ',')
+        {
+            if (stream == null || !stream.CanRead)
+            {
+                throw new ArgumentException("Cannot read from stream.");
+            }
+
+            var csv = new Models.Csv<T>
+            {
+                Separator = separator,
+            };
+
+            using var reader = new StreamReader(stream);
+            var currentLine = reader.ReadLine();
+
+            if (hasHeaders)
+            {
+                currentLine = reader.ReadLine();
+            }
+
+            while (!string.IsNullOrWhiteSpace(currentLine))
+            {
+                AddRowData(csv, currentLine, csv.Headers.Count());
                 currentLine = reader.ReadLine();
             }
 
