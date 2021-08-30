@@ -56,7 +56,15 @@ namespace Csv.Core.Models
 
         public void AddRange(ICollection<T> items)
         {
-            throw new NotImplementedException();
+            foreach (var item in items)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                Add(item);
+            }
         }
 
         public T Get(int index)
