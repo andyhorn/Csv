@@ -17,6 +17,15 @@ namespace Csv.Core.Models
                 .Where(p => p.PropertyType.IsPrimitive || p.PropertyType.Equals(typeof(string)))
                 .OrderBy(p => p.Name)
                 .ToList();
+
+            Headers = new ICsvHeader[_properties.Count];
+            for (var i = 0; i < Headers.Length; i++)
+            {
+                Headers[i] = new CsvHeader(i, _properties[i].Name);
+            }
+
+            HeaderMap = new Dictionary<PropertyInfo, string>();
+            Ignores = new List<PropertyInfo>();
         }
 
         public Dictionary<PropertyInfo, string> HeaderMap { get; set; }
@@ -25,7 +34,24 @@ namespace Csv.Core.Models
 
         public void Add(T item)
         {
-            throw new NotImplementedException();
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            var rowIndex = NumRows;
+
+            foreach (var property in _properties)
+            {
+                if (Ignores?.Contains(property) ?? false)
+                {
+                    continue;
+                }
+
+                object value = property.GetValue(item);
+                var columnIndex = GetColumnIndex(property);
+                SetCell(rowIndex, columnIndex, value);
+            }
         }
 
         public void AddRange(ICollection<T> items)
@@ -44,6 +70,11 @@ namespace Csv.Core.Models
         }
 
         public void Remove(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        private int GetColumnIndex(PropertyInfo property)
         {
             throw new NotImplementedException();
         }
