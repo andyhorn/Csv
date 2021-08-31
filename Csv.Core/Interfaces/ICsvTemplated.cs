@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Csv.Core.Interfaces
@@ -14,13 +15,40 @@ namespace Csv.Core.Interfaces
         /// Gets or sets a mapping of <see cref="PropertyInfo"/> to strings.
         /// The value will be used as the header instead of the property name.
         /// </summary>
-        Dictionary<PropertyInfo, string> HeaderMap { get; set; }
+        ImmutableDictionary<PropertyInfo, string> HeaderMap { get; }
 
         /// <summary>
         /// Gets or sets a list of <see cref="PropertyInfo"/> to be ignored when
         /// storing, reading, and writing the CSV document data.
         /// </summary>
-        List<PropertyInfo> Ignores { get; set; }
+        ImmutableList<PropertyInfo> Ignores { get; }
+
+        /// <summary>
+        /// Adds a new header mapping to the dictionary. The <see cref="PropertyInfo"/>
+        /// column will use the new title when writing the CSV data.
+        /// </summary>
+        /// <param name="property">The <see cref="PropertyInfo"/> to be mapped.</param>
+        /// <param name="title">The new title for the column.</param>
+        void AddHeaderMap(PropertyInfo property, string title);
+
+        /// <summary>
+        /// Removes an existing mapping for the <see cref="PropertyInfo"/>,
+        /// returning the column title to the property name.
+        /// </summary>
+        /// <param name="property">The <see cref="PropertyInfo"/> to be un-mapped.</param>
+        void RemoveHeaderMap(PropertyInfo property);
+
+        /// <summary>
+        /// Adds a <see cref="PropertyInfo"/> to the <see cref="Ignores"/> list.
+        /// </summary>
+        /// <param name="property">The <see cref="PropertyInfo"/> to be ignored.</param>
+        void IgnoreProperty(PropertyInfo property);
+
+        /// <summary>
+        /// Removes a <see cref="PropertyInfo"/> from the <see cref="Ignores"/> list.
+        /// </summary>
+        /// <param name="property">The <see cref="PropertyInfo"/> to be acknowledged.</param>
+        void AcknowledgeProperty(PropertyInfo property);
 
         /// <summary>
         /// Adds a new item of type <typeparamref name="T"/> to the CSV document.

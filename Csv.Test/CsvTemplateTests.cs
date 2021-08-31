@@ -59,21 +59,22 @@ namespace Csv.Test
         }
 
         [Test]
-        public void Add_IgnoresProperties()
+        public void CannotAddPropertyDirectlyToList()
         {
-            _uut.Ignores.Add(typeof(TestClass).GetProperty(nameof(TestClass.Float)));
-
-            _uut.Add(_testClass);
-
-            Assert.IsFalse(_uut.Headers.Any(h => h.Title.Equals(nameof(TestClass.Float))));
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
+            _uut.Ignores.Add(property);
+            Assert.IsFalse(_uut.Ignores.Contains(property));
         }
 
         [Test]
-        public void Add_NullIgnoreList()
+        public void Add_IgnoresProperties()
         {
-            _uut.Ignores = null;
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
 
-            Assert.DoesNotThrow(() => _uut.Add(_testClass));
+            _uut.IgnoreProperty(property);
+            _uut.Add(_testClass);
+
+            Assert.IsFalse(_uut.Headers.Any(h => h.Title.Equals(property.Name)));
         }
 
         [Test]
@@ -278,7 +279,7 @@ namespace Csv.Test
                 { typeof(TestClass).GetProperty(nameof(TestClass.Text)), customHeader },
             };
 
-            _uut.HeaderMap = map;
+            _uut = new Csv<TestClass>(headerMap: map);
 
             _uut.Add(_testClass);
 
