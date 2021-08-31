@@ -24,7 +24,9 @@
     <EmbeddedResource Include="BaseTestCsv.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="TestClassCsv.csv" />
+    <EmbeddedResource Include="TestClassCsv.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Utilities\" />

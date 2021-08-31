@@ -57,6 +57,7 @@ namespace Csv.Core.Readers
             var csv = GetCsv();
 
             SetHeaders(csv, lines);
+            SetNumColumns(lines);
             AddAllRows(csv, lines);
 
             return csv;
@@ -77,6 +78,8 @@ namespace Csv.Core.Readers
             SetHeaders(csv, reader);
 
             var currentLine = reader.ReadLine();
+            SetNumColumns(currentLine);
+
             while (!string.IsNullOrWhiteSpace(currentLine))
             {
                 AddRow(csv, currentLine);
@@ -152,6 +155,20 @@ namespace Csv.Core.Readers
 
             var headerLine = reader.ReadLine();
             SetHeaders(csv, new string[] { headerLine });
+        }
+
+        private void SetNumColumns(string[] lines)
+        {
+            SetNumColumns(lines.First());
+        }
+
+        private void SetNumColumns(string firstLine)
+        {
+            var numColumns = firstLine
+                .Split(Separator)
+                .Count();
+
+            _numColumns = numColumns;
         }
     }
 }
