@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Csv.Core.Interfaces;
@@ -75,6 +76,79 @@ namespace Csv.Test
             _uut.Add(_testClass);
 
             Assert.IsFalse(_uut.Headers.Any(h => h.Title.Equals(property.Name)));
+        }
+
+        [Test]
+        public void CannotAddMapDirectly()
+        {
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
+
+            _uut.HeaderMap.Add(property, "Test");
+
+            Assert.IsFalse(_uut.HeaderMap.ContainsKey(property));
+        }
+
+        [Test]
+        public void HeaderMapAddedToDictionary()
+        {
+            const string title = "Test";
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
+
+            _uut.AddHeaderMap(property, title);
+
+            Assert.IsTrue(_uut.HeaderMap.ContainsKey(property));
+            Assert.AreEqual(title, _uut.HeaderMap[property]);
+        }
+
+        [Test]
+        public void HeaderMapChangesHeaders()
+        {
+            const int index = 1;
+            const string newTitle = "Test";
+            var header = _uut.Headers[index];
+            var title = header.Title;
+            var property = typeof(TestClass).GetProperty(title);
+
+            _uut.AddHeaderMap(property, newTitle);
+
+            Assert.AreEqual(newTitle, _uut.Headers[index].Title);
+        }
+
+        [Test]
+        public void HeaderMapCtorChangesHeaders()
+        {
+            const string title = "TITLE";
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
+            var map = new Dictionary<PropertyInfo, string>
+            {
+                { property, title },
+            };
+
+            _uut = new Csv<TestClass>(headerMap: map);
+
+            Assert.IsTrue(_uut.HeaderMap.ContainsKey(property));
+            Assert.AreEqual(title, _uut.HeaderMap[property]);
+            Assert.IsFalse(_uut.Headers.Any(h => h.Title.Equals(nameof(TestClass.Text))));
+        }
+
+        [Test]
+        public void AddNullPropertyToHeaderMapThrowsException()
+        {
+            Assert.Throws<ArgumentNullException>(() => _uut.AddHeaderMap(null, "Test"));
+        }
+
+        [Test]
+        public void AddEmptyStringToHeaderMapThrowsException()
+        {
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
+            Assert.Throws<ArgumentNullException>(() => _uut.AddHeaderMap(property, string.Empty));
+        }
+
+        [Test]
+        public void CannotAddPropertyFromDifferentObject()
+        {
+            var property = typeof(FileInfo).GetProperty(nameof(FileInfo.CreationTime));
+            Assert.Throws<ArgumentException>(() => _uut.AddHeaderMap(property, "Test"));
         }
 
         [Test]
