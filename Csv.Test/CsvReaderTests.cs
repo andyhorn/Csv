@@ -61,7 +61,7 @@ namespace Csv.Test
             var path = Path.Combine(Directory.GetCurrentDirectory(), BaseCsvFilename);
             var csv = _reader.FromFile(path);
 
-            Assert.AreEqual(numRows, csv.Rows.Count());
+            Assert.AreEqual(numRows, csv.NumRows);
         }
 
         [Test]

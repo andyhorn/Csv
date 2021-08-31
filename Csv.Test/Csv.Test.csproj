@@ -17,10 +17,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="BaseTestCsv.csv" />
+    <None Remove="TestClassCsv.csv" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BaseTestCsv.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="TestClassCsv.csv" />
   </ItemGroup>
 </Project>
