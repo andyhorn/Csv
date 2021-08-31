@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Csv.Core;
 using Csv.Core.Interfaces;
 using Csv.Core.Models;
+using Csv.Core.Writers;
 using NUnit.Framework;
 
 namespace Csv.Test
@@ -11,13 +11,21 @@ namespace Csv.Test
     [TestFixture]
     public class CsvWriterTests
     {
+        private ICsvWriter _writer;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _writer = new CsvWriter();
+        }
+
         [Test]
         public void WritesToFile()
         {
             var csv = MakeTestCsv();
             var filePath = Path.GetTempFileName();
 
-            CsvWriter.ToFile(csv, filePath);
+            _writer.ToFile(csv, filePath);
 
             var exists = File.Exists(filePath);
 
@@ -35,7 +43,7 @@ namespace Csv.Test
             var csv = MakeTestCsv();
             var filePath = Path.GetTempFileName();
 
-            await CsvWriter.ToFileAsync(csv, filePath);
+            await _writer.ToFileAsync(csv, filePath);
 
             var exists = File.Exists(filePath);
 
@@ -54,7 +62,7 @@ namespace Csv.Test
             var filePath = Path.GetTempFileName();
             var stream = File.OpenWrite(filePath);
 
-            CsvWriter.ToStream(csv, stream);
+            _writer.ToStream(csv, stream);
 
             var exists = File.Exists(filePath);
 
@@ -73,7 +81,7 @@ namespace Csv.Test
             var filePath = Path.GetTempFileName();
             var stream = File.OpenWrite(filePath);
 
-            await CsvWriter.ToStreamAsync(csv, stream);
+            await _writer.ToStreamAsync(csv, stream);
 
             var exists = File.Exists(filePath);
 
@@ -92,7 +100,7 @@ namespace Csv.Test
             var filePath = Path.GetTempFileName();
             var headerContent = string.Join(csv.Separator, csv.Headers.Select(x => x.Title));
 
-            await CsvWriter.ToFileAsync(csv, filePath);
+            await _writer.ToFileAsync(csv, filePath);
 
             var exists = File.Exists(filePath);
 
