@@ -9,14 +9,14 @@ using NUnit.Framework;
 namespace Csv.Test
 {
     [TestFixture]
-    public class CsvWriterTests
+    public class CsvWriterTemplatedTests
     {
         private readonly CsvFactory _factory;
-        private ICsvWriter _writer;
-        private ICsv _csv;
+        private CsvWriter<TestClass> _writer;
+        private ICsv<TestClass> _csv;
         private string _tempFilePath;
 
-        public CsvWriterTests()
+        public CsvWriterTemplatedTests()
         {
             _factory = new CsvFactory();
         }
@@ -24,8 +24,8 @@ namespace Csv.Test
         [SetUp]
         public void SetUp()
         {
-            _writer = new CsvWriter();
-            _csv = _factory.Make();
+            _writer = new CsvWriter<TestClass>();
+            _csv = _factory.Make<TestClass>();
             _tempFilePath = Path.GetTempFileName();
         }
 
@@ -97,12 +97,11 @@ namespace Csv.Test
             }
 
             var fileData = File.ReadAllLines(_tempFilePath);
-
             Assert.AreEqual(headerContent, fileData[0]);
 
             for (var i = 1; i < fileData.Count(); i++)
             {
-                Assert.AreEqual(string.Join(_csv.Separator, _csv.Cells[i - 1].Select(x => x.Value)), fileData[i]);
+                Assert.AreEqual(string.Join(_csv.Separator, _csv.Cells[i - 1].Select(c => c.Value)), fileData[i]);
             }
         }
     }
