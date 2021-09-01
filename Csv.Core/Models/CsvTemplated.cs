@@ -13,6 +13,7 @@ namespace Csv.Core.Models
     /// </summary>
     /// <typeparam name="T">The data <see cref="Type"/> being held by this class.</typeparam>
     internal class Csv<T> : Csv, ICsv<T>
+        where T : class
     {
         private const string InvalidPropertyTemplate = "Property {0} does not belong to type parameter {1}.";
         private const string NonPrimitivePropertyTemplate = "Property {0} must be primitive data type.";

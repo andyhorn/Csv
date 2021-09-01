@@ -12,6 +12,7 @@ namespace Csv.Core.Readers
     /// <typeparam name="T">The <see cref="Type"/> of object
     /// to be produced from the source.</typeparam>
     public class CsvReader<T> : CsvReader, ICsvReader
+        where T : class
     {
         protected override ICsv GetCsv()
         {

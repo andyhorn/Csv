@@ -10,7 +10,7 @@ namespace Csv.Test
         [Test]
         public void ReturnsNewInstance()
         {
-            var csv = CsvFactory.New;
+            var csv = CsvFactory.New();
 
             Assert.IsInstanceOf<ICsv>(csv);
         }
@@ -18,8 +18,8 @@ namespace Csv.Test
         [Test]
         public void ReturnsNewInstances()
         {
-            var csvOne = CsvFactory.New;
-            var csvTwo = CsvFactory.New;
+            var csvOne = CsvFactory.New();
+            var csvTwo = CsvFactory.New();
 
             Assert.AreNotSame(csvOne, csvTwo);
         }

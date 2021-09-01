@@ -18,6 +18,7 @@ namespace Csv.Test.Utilities
         }
 
         public ICsv<T> Make<T>()
+            where T : class
         {
             var csv = new Csv<T>();
 

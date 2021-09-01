@@ -10,6 +10,7 @@ namespace Csv.Core.Writers
     /// </summary>
     /// <typeparam name="T">The <see cref="Type"/> of object being written.</typeparam>
     public class CsvWriter<T> : CsvWriter, ICsvWriter
+        where T : class
     {
         private readonly PropertyInfo[] _properties;
 

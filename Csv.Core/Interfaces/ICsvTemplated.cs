@@ -10,6 +10,7 @@ namespace Csv.Core.Interfaces
     /// </summary>
     /// <typeparam name="T">The <see cref="Type"/> of data being stored.</typeparam>
     public interface ICsv<T> : ICsv
+        where T : class
     {
         /// <summary>
         /// Gets or sets a mapping of <see cref="PropertyInfo"/> to strings.
