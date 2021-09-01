@@ -1,4 +1,5 @@
 ﻿using Csv.Core;
+using Csv.Core.Interfaces;
 using NUnit.Framework;
 
 namespace Csv.Test
@@ -9,16 +10,33 @@ namespace Csv.Test
         [Test]
         public void ReturnsNewInstance()
         {
-            var csv = CsvFactory.New;
+            var csv = CsvFactory.New();
 
-            Assert.IsNotNull(csv);
+            Assert.IsInstanceOf<ICsv>(csv);
         }
 
         [Test]
         public void ReturnsNewInstances()
         {
-            var csvOne = CsvFactory.New;
-            var csvTwo = CsvFactory.New;
+            var csvOne = CsvFactory.New();
+            var csvTwo = CsvFactory.New();
+
+            Assert.AreNotSame(csvOne, csvTwo);
+        }
+
+        [Test]
+        public void ReturnsNewTemplatedInstance()
+        {
+            var csv = CsvFactory.ForType<TestClass>();
+
+            Assert.IsInstanceOf<ICsv<TestClass>>(csv);
+        }
+
+        [Test]
+        public void ReturnsNewTemplatedInstances()
+        {
+            var csvOne = CsvFactory.ForType<TestClass>();
+            var csvTwo = CsvFactory.ForType<TestClass>();
 
             Assert.AreNotSame(csvOne, csvTwo);
         }

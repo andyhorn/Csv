@@ -19,9 +19,13 @@
   <ItemGroup>
     <None Remove="Interfaces\" />
     <None Remove="Models\" />
+    <None Remove="Readers\" />
+    <None Remove="Writers\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Models\" />
+    <Folder Include="Readers\" />
+    <Folder Include="Writers\" />
   </ItemGroup>
 </Project>
