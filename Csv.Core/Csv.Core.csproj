@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Description>.Net Core class library for reading, manipulating, and writing CSV data.</Description>
-    <PackageVersion>1.0.0.0</PackageVersion>
+    <PackageVersion>2.0.0.0</PackageVersion>
     <Authors>Andrew Horn</Authors>
     <PackageProjectUrl>https://github.com/andyhorn/Csv/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/andyhorn/Csv/</RepositoryUrl>
@@ -13,7 +13,7 @@
     <Title>Csv.Core</Title>
     <Copyright>Copyright (c) Andrew Horn 2021</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>Initial release with basic read and write functionality</PackageReleaseNotes>
+    <PackageReleaseNotes>Added template implementation for data mapping support.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
