@@ -1,30 +1,41 @@
-# Csv.Core
+# Csv.Core 2.0
 
-A simple .Net Core class library for reading, manipulating, and writing CSV-formatted data.
+A simple .Net Core class library for reading, manipulating, and writing CSV-formatted data and, as of 2.0, mapping between CSV data and user-defined classes.
 
-## Overview
+## v2.0.0 Release Notes
 
-Read CSV data from a file or `Stream` with the `CsvReader` class or create a new instance with the `CsvFactory` (`CsvFactory.New`).
+**New Features**
 
-Examine and manipulate CSV data in memory with the `ICsv` interface.
+  * A new `ICsv<T>` interface supports templates and mapping between CSV and user-defined classes
 
-Write the contents of an `ICsv` interface to a file or `Stream` with the `CsvWriter` class.
+**Breaking Changes**
 
-## Structure
+  * The reader and writer classes are no longer static and must be instantiated with the `new` keyword
+  * The reader and writer classes are now implementations of the `ICsvReader` and `ICsvWriter` interfaces, respectively
+  * The `CsvFactory`'s "New" property has been depricated in favor of a traditional method call: `CsvFactory.New();`
 
-The structure of this library follows the structure of a typical table, as seen below.
+# Overview
+
+Read, Manipulate, and Write CSV-formatted data with the base `ICsv` interface or the type-specific `ICsv<T>` interface.
+
+## ICsv
+
+The base `ICsv` provides an interface for managing raw CSV data using a set of **Headers**, **Rows**, **Columns**, and **Cells**.
 
 ![Table Example](Csv.Core.png)
 
-The `ICsv` interface contains properties for each of these elements, named appropriately:
+The `ICsv` interface exposes properties for each of these elements.
 
-  * Headers --> `ICsvHeader`
-  * Rows --> `ICsvRow`
-  * Columns --> `ICsvColumn`
-  * Cells --> `ICsvCell`
+Element|Property|Type|Comments
+---|---|---|---
+Header|`ICsv.Headers`|`ICsvHeader[]`|Contains a `Title` and `Index`
+Row|`ICsv.Rows`|`ICsvRow[]`|Contains an `ICsvCell[]` for all `ICsvCell` objects in the row
+Column|`ICsv.Columns`|`ICsvColumn[]`|Contains an `ICsvCell[]` property for all `ICsvCell` objects in the column
+Cell|`ICsv.Cells`|`ICsvCell[][]`|<ul><li>[Row][Column] indexing</li><li>Contains a reference to the cell's `ICsvHeader`</li></ul>
 
-### The Interface
-The main component of this library is the `ICsv` interface.
+
+### The ICsv Interface
+The base component of this library is the `ICsv` interface.
 
 ```
 public interface ICsv
@@ -44,96 +55,154 @@ public interface ICsv
 }
 ```
 
-
-
-## Usage
-
-### Reading
-
-There are two methods of reading data into an `ICsv` instance: from a file or from a `Stream` object - Each method contains an `async` and a synchronous version.
-
-Every read method contains two optional parameters:
-
-  * `bool hasHeaders = true`
-    * With this flag set to `true`, the first line of data will be parsed as a set of `ICsvHeader` elements
-    * If this flag is set to `false`, the first line of data will be treated as the first row and no headers will be created
-  * `char separator = ','`
-    * This value indicates the character used to separate "cells" in the CSV data
-    * Change this value if you use something other than a comma
-
-#### File
-
-
-To read a CSV-formatted file:
+### The ICsv\<T> Interface
+New in v2.0 is the templated `ICsv<T>` interface, which extends the base `ICsv` interface with new class/object-focused methods:
 
 ```
-ICsv csv = CsvReader.FromFile("/path/to/file.csv");
+public interface ICsv<T> : ICsv
+	where T: class
+{
+	// change the 'title' used in the header row for specific class properties
+	ImmutableDictionary<PropertyInfo, string> HeaderMap { get; }
+	
+	// ignore entire properties (columns) in the CSV
+	ImmutableList<PropertyInfo> Ignores { get; }
+	
+	// add a new property <--> title mapping
+	void AddHeaderMap(PropertyInfo property, string title);
+	
+	// remove an existing property <--> title map
+	void RemoveHeaderMap(PropertyInfo property);
+	
+	// add a property to the ignore list
+	void IgnoreProperty(PropertyInfo property);
+	
+	// remove a property from the ignore list
+	void AcknowledgeProperty(PropertyInfo property);
+	
+	// add a new item (row) of type T to the CSV
+	void Add(T item);
+	
+	// add a collection of items to the CSV
+	void AddRange(ICollection<T> items);
+	
+	// retrieve an item from the specified row index
+	T Get(int index);
+	
+	// retrieve all items from the CSV
+	ICollection<T> Get();
+	
+	// remove an item (row) from the CSV
+	void Remove(int index);
+}	
 ```
 
-OR
+**Note:** At this time, this interface only supports reading/writing primitive data types. Complex data structures will not be saved in the CSV data.
+
+## Factories
+
+Currently, the implementations of the `ICsv` and `ICsv<T>` interfaces are marked `internal` and cannot be instantiated directly; instead, you must use a reader class to create an instance and fill it with data OR a factory to retrieve a new, empty instance.
+
+For a base `ICsv` with no template mapping capabilities, use:
 
 ```
-ICsv csv = await CsvReader.FromFileAsync("/path/to/file.csv");
+ICsv csv = CsvFactory.New();
 ```
 
-#### Stream
-
-To read CSV-formatted data from a `Stream`:
+For an instance of the templated `ICsv<T>` interface, use:
 
 ```
-Stream stream = GetStream();
-ICsv csv = CsvReader.FromStream(stream);
+ICsv<ClassType> csv = CsvFactory.ForType<ClassType>();
 ```
 
-OR
+# Usage
+
+## Reading
+
+Within the Csv.Core.Readers namespace are two `CsvReader` classes that will read CSV data and return an `ICsv` (or `ICsv<T>`) instance.
+
+**ICsv**
 
 ```
-Stream stream = GetStream();
-ICsv csv = await CsvReader.FromStreamAsync(stream);
+var filename = GetFileName();
+ICsvReader reader = new CsvReader();
+ICsv csv = reader.FromFile(filename);
 ```
 
-### Writing
-Once you have an `ICsv` instance, you can use the `CsvWriter` class to write the CSV-formatted data to a file or `Stream`.
-
-Both methods contain an `async` version as well as a synchronous version.
-
-#### File
-To write an `ICsv` instance to file:
+**ICsv\<T>**
 
 ```
-ICsv csv = MakeACsv();
-CsvWriter.ToFile(csv, "/path/to/file.csv");
+var filename = GetFileName();
+ICsvReader reader = new CsvReader<ClassType>();
+ICsv<ClassType> csv = reader.FromFile(filename);
 ```
 
-OR
+### The ICsvReader Interface
+
+The `ICsvReader` interface exposes four different types of read:
 
 ```
-ICsv csv = MakeACsv();
-await CsvWriter.ToFileAsync(csv, "/path/to/file.csv");
+public interface ICsvReader
+{
+	bool HasHeaders { get; set; }
+	char Separator { get; set; }
+	
+	ICsv FromString(string csvData);
+	ICsv FromLines(string[] lines);
+	ICsv FromFile(string filePath);
+	ICsv FromStream(Stream stream);
+}
 ```
 
-#### Stream
-To write an `ICsv` instance to a `Stream`:
+Both implementations of the interface use default values of:
+
+  * `HasHeaders = true`
+  * `Separator = ','`
+
+## Writing
+
+Within the Csv.Core.Writers namespace are two `ICsvWriter` implementations that will take an `ICsv` instance and export the data in CSV format.
+
+**ICsv**
 
 ```
-ICsv csv = MakeACsv();
-Stream stream = GetStream();
-CsvWriter.ToStream(csv, stream);
+ICsv csv = MakeCsv();
+ICsvWriter writer = new CsvWriter();
+writer.ToFile(csv, "/path/to/file.csv");
 ```
 
-OR
+**ICsv\<T>**
 
 ```
-ICsv csv = MakeACsv();
-Stream stream = GetStream();
-await CsvWriter.ToStreamAsync(csv, stream);
+ICsv<ClassType> csv = MakeCsv();
+ICsvWriter writer = new CsvWriter<ClassType>();
+writer.ToFile(csv, "/path/to/file.csv");
 ```
 
-## Future Objectives
-My hope is to keep this library simple and easy to use while providing useful features, which means it is open for improvements.
+**Note:** The non-templated writer _can_ write `ICsv<T>` objects, but it will not use the `HeaderMap` or `Ignores` properties.
 
-Some ideas for possible improvements include:
-  * Templating the `ICsv` interface to easily map between CSV data and user-defined C# classes
+### The ICsvWriter Interface
+
+The `ICsvWriter` interface exposes several methods for exporting CSV data:
+
+```
+public ICsvWriter
+{
+	Task ToFileAsync(ICsv csv, string filePath);
+	void ToFile(ICsv csv, string filePath);
+	Task ToStreamAsync(ICsv csv, Stream stream);
+	void ToStream(ICsv csv, Stream stream);
+	Task<string> ToStringAsync(ICsv csv);
+	string ToString(ICsv csv);
+}
+```
+
+# Future Objectives
+
+Possible improvements:
+
+  * <s>Templating for class mapping</s> - Implemented in v2.0.0
 
 # Known Bugs
-There are no currently identified issues.
+
+  * None
