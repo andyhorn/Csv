@@ -20,6 +20,7 @@ namespace Csv.Test
         {
             _properties = typeof(TestClass)
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => p.PropertyType.IsPrimitive || p.PropertyType.Equals(typeof(string)))
                 .ToArray();
         }
 
@@ -79,6 +80,34 @@ namespace Csv.Test
         }
 
         [Test]
+        public void IgnoresListInCtorRemovesHeader()
+        {
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
+            var ignores = new List<PropertyInfo> { property };
+            _uut = new Csv<TestClass>(ignores: ignores);
+
+            Assert.IsFalse(_uut.Headers.Any(h => h.Title.Equals(nameof(TestClass.Text))));
+        }
+
+        [Test]
+        public void InvalidPropertyInIgnoresCtorThrowsException()
+        {
+            var property = typeof(FileInfo).GetProperty(nameof(FileInfo.CreationTime));
+            var ignores = new List<PropertyInfo> { property };
+
+            Assert.Throws<ArgumentException>(() => _uut = new Csv<TestClass>(ignores));
+        }
+
+        [Test]
+        public void NonPrimitivePropertyInIgnoresCtorThrowsException()
+        {
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.ChildObject));
+            var ignores = new List<PropertyInfo> { property };
+
+            Assert.Throws<ArgumentException>(() => _uut = new Csv<TestClass>(ignores: ignores));
+        }
+
+        [Test]
         public void CannotAddMapDirectly()
         {
             var property = typeof(TestClass).GetProperty(nameof(TestClass.Text));
@@ -129,6 +158,30 @@ namespace Csv.Test
             Assert.IsTrue(_uut.HeaderMap.ContainsKey(property));
             Assert.AreEqual(title, _uut.HeaderMap[property]);
             Assert.IsFalse(_uut.Headers.Any(h => h.Title.Equals(nameof(TestClass.Text))));
+        }
+
+        [Test]
+        public void InvalidPropertyInHeaderMapCtorThrowsException()
+        {
+            var property = typeof(FileInfo).GetProperty(nameof(FileInfo.CreationTime));
+            var map = new Dictionary<PropertyInfo, string>
+            {
+                { property, "Test" },
+            };
+
+            Assert.Throws<ArgumentException>(() => _uut = new Csv<TestClass>(headerMap: map));
+        }
+
+        [Test]
+        public void NonPrimitivePropertyInHeaderMapCtorThrowsException()
+        {
+            var property = typeof(TestClass).GetProperty(nameof(TestClass.ChildObject));
+            var map = new Dictionary<PropertyInfo, string>
+            {
+                { property, "Test" },
+            };
+
+            Assert.Throws<ArgumentException>(() => _uut = new Csv<TestClass>(headerMap: map));
         }
 
         [Test]

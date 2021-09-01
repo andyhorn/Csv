@@ -14,6 +14,8 @@ namespace Csv.Core.Models
     /// <typeparam name="T">The data <see cref="Type"/> being held by this class.</typeparam>
     internal class Csv<T> : Csv, ICsv<T>
     {
+        private const string InvalidPropertyTemplate = "Property {0} does not belong to type parameter {1}.";
+        private const string NonPrimitivePropertyTemplate = "Property {0} must be primitive data type.";
         private readonly List<PropertyInfo> _properties;
         private readonly Dictionary<PropertyInfo, string> _headerMap;
         private List<PropertyInfo> _ignores;
@@ -23,66 +25,14 @@ namespace Csv.Core.Models
         /// </summary>
         public Csv(List<PropertyInfo> ignores = null, Dictionary<PropertyInfo, string> headerMap = null)
         {
-            if (ignores != null && ignores.Any())
-            {
-                foreach (var property in ignores)
-                {
-                    if (!property.DeclaringType.Equals(typeof(T)))
-                    {
-                        throw new ArgumentException($"Parameter 'ignores' can only contain properties that belong to type parameter {typeof(T)}.");
-                    }
+            ValidateIgnoresList(ignores);
+            ValidateHeaderMap(headerMap);
 
-                    if (!property.PropertyType.IsPrimitive && !property.PropertyType.Equals(typeof(string)))
-                    {
-                        throw new ArgumentException($"Parameter 'ignores' can only contain primitive property types.");
-                    }
-                }
-            }
-
-            if (headerMap != null && headerMap.Any())
-            {
-                foreach (var (property, _) in headerMap)
-                {
-                    if (!property.DeclaringType.Equals(typeof(T)))
-                    {
-                        throw new ArgumentException($"Parameter 'headerMap' can only contain properties that belong to type parameter {typeof(T)}.");
-                    }
-
-                    if (!property.PropertyType.IsPrimitive && !property.PropertyType.Equals(typeof(string)))
-                    {
-                        throw new ArgumentException($"Parameter 'headerMap' can only contain primitive property types.");
-                    }
-                }
-            }
-
-            _properties = typeof(T)
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(p => p.PropertyType.IsPrimitive || p.PropertyType.Equals(typeof(string)))
-                .OrderBy(p => p.Name)
-                .ToList();
-
+            _properties = GetProperties();
             _headerMap = headerMap ?? new Dictionary<PropertyInfo, string>();
             _ignores = ignores ?? new List<PropertyInfo>();
 
-            var headers = new List<ICsvHeader>();
-            var index = 0;
-            foreach (var property in _properties)
-            {
-                if (_ignores.Contains(property))
-                {
-                    continue;
-                }
-
-                var title = _headerMap.ContainsKey(property)
-                    ? _headerMap[property]
-                    : property.Name;
-
-                var header = new CsvHeader(index++, title);
-
-                headers.Add(header);
-            }
-
-            Headers = headers.ToArray();
+            Headers = MakeHeaders();
         }
 
         /// <inheritdoc/>
@@ -106,10 +56,7 @@ namespace Csv.Core.Models
                 throw new ArgumentNullException(nameof(title));
             }
 
-            if (!property.DeclaringType.Equals(typeof(T)))
-            {
-                throw new ArgumentException($"Property {property} must belong to type parameter {typeof(T)}");
-            }
+            ValidateProperty(property);
 
             if (_headerMap.ContainsKey(property))
             {
@@ -137,10 +84,7 @@ namespace Csv.Core.Models
                 throw new ArgumentNullException(nameof(property));
             }
 
-            if (!property.DeclaringType.Equals(typeof(T)))
-            {
-                throw new ArgumentException($"Property {property} must belong to type parameter {typeof(T)}");
-            }
+            ValidateProperty(property);
 
             if (!_headerMap.ContainsKey(property))
             {
@@ -163,17 +107,18 @@ namespace Csv.Core.Models
         /// <inheritdoc/>
         public void IgnoreProperty(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
             // if the property is already in the list, do nothing
             if (_ignores.Contains(property))
             {
                 return;
             }
 
-            // if the property does not belong to this CSV's type, throw
-            if (!property.DeclaringType.Equals(typeof(T)))
-            {
-                throw new ArgumentException(nameof(property));
-            }
+            ValidateProperty(property);
 
             // add the property
             _ignores.Add(property);
@@ -192,17 +137,18 @@ namespace Csv.Core.Models
         /// <inheritdoc/>
         public void AcknowledgeProperty(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
             // if the property is not being ignored, do nothing
             if (!_ignores.Contains(property))
             {
                 return;
             }
 
-            // if the property does not belong to the CSV's type, throw
-            if (!property.DeclaringType.Equals(typeof(T)))
-            {
-                throw new ArgumentException(nameof(property));
-            }
+            ValidateProperty(property);
 
             // remove the property
             _ignores.Remove(property);
@@ -325,6 +271,88 @@ namespace Csv.Core.Models
             }
 
             return header;
+        }
+
+        private void ValidateIgnoresList(List<PropertyInfo> ignores)
+        {
+            if (ignores == null || !ignores.Any())
+            {
+                return;
+            }
+
+            foreach (var property in ignores)
+            {
+                ValidateProperty(property);
+            }
+        }
+
+        private void ValidateHeaderMap(Dictionary<PropertyInfo, string> headerMap)
+        {
+            if (headerMap == null || !headerMap.Any())
+            {
+                return;
+            }
+
+            foreach (var (property, _) in headerMap)
+            {
+                ValidateProperty(property);
+            }
+        }
+
+        private void ValidateProperty(PropertyInfo property)
+        {
+            if (!IsTemplateProperty(property))
+            {
+                throw new ArgumentException(string.Format(InvalidPropertyTemplate, property.Name, typeof(T).Name));
+            }
+
+            if (!IsPrimitive(property))
+            {
+                throw new ArgumentException(string.Format(NonPrimitivePropertyTemplate, property.Name));
+            }
+        }
+
+        private bool IsTemplateProperty(PropertyInfo property)
+        {
+            return property.DeclaringType.Equals(typeof(T));
+        }
+
+        private bool IsPrimitive(PropertyInfo property)
+        {
+            return property.PropertyType.IsPrimitive || property.PropertyType.Equals(typeof(string));
+        }
+
+        private List<PropertyInfo> GetProperties()
+        {
+            return typeof(T)
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(IsPrimitive)
+                .OrderBy(p => p.Name)
+                .ToList();
+        }
+
+        private ICsvHeader[] MakeHeaders()
+        {
+            var headers = new List<ICsvHeader>();
+            var index = 0;
+
+            foreach (var property in _properties)
+            {
+                if (_ignores.Contains(property))
+                {
+                    continue;
+                }
+
+                var title = _headerMap.ContainsKey(property)
+                    ? _headerMap[property]
+                    : property.Name;
+
+                var header = new CsvHeader(index++, title);
+
+                headers.Add(header);
+            }
+
+            return headers.ToArray();
         }
     }
 }

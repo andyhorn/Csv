@@ -6,5 +6,6 @@
         public int Number { get; set; }
         public float Float { get; set; }
         public bool Boolean { get; set; }
+        public TestClass ChildObject { get; set; }
     }
 }
